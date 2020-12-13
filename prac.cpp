@@ -7,9 +7,10 @@
 #include <vector>
 #include <thread>
 #include <ctime>
-#include <chrono>
 #include <complex>
 #include <cmath>
+#include <stdio.h>
+#include <conio.h>
 
 using namespace std;
 double mrate = 0.01;
@@ -76,7 +77,7 @@ void printtime(const chrono::system_clock::time_point& p)
   cout << buf;
 }
 
-int main(int argc, char const *argv[])
+int main(void)
 {
     char *file13 = "./wave13.dat", *file15 = "./wave15.dat";
     char finit[20] = "init.csv", ffinal[20] = "final.csv";
@@ -93,7 +94,8 @@ int main(int argc, char const *argv[])
     extract_momentum(voltage_13, voltage_15, moment_real_13, moment_real_15, 1, 0, 'g');
     Uniform(time(NULL));
     chrono::system_clock::time_point now = chrono::system_clock::now();
-    int i=0, j, k, t=0, w=0, gen=atoi(argv[1]);
+    int i=0, j, k, t=0;
+    double w[8] = {1.0e-1, 1.0e-2, 1.0e-3, 1.0e-4, 1.0e-5, 1.0e-6, 1.0e-7, 1.0e-8};
     double mom[16], mom_res[16];
     for (k=0;k<16;k++)
     {
@@ -107,6 +109,7 @@ int main(int argc, char const *argv[])
     printf("*    Initial statistic information of particle");
     printStat(particle_init, finit);
     printf("*    Generation algorithm start\n");
+    printf("*    Press x to stop program\n");
     printf("*    ");
     printtime(now);
     particle = particle_init;
@@ -119,34 +122,19 @@ int main(int argc, char const *argv[])
         if (i==0) {
             z[0] = 1.0e50; z[1] = 1.0e99;
         }
-        if (i!=0) particle = particle_better;
-        if (i!=0 || i!=gen-5) mutation(particle);
-        if (t>1000 && t<=2000) {
-            w = -0.5;
-        } else if (t>2000 && t<=3000) {
-            w = -1.0;
-        } else if (t>3000 && t<=4000) {
-            w = -1.5;
-        } else if (t>4000 && t<=5000) {
-            w = -2.0;
-        } else if (t>5000 && t<=6000) {
-            w = -3.0;
-        } else if (t>6000 && t<=7000) {
-            w = -4.0;
-        } else if (t>7000 && t<=8000) {
-            w = -5.0;
-        } else if (t>8000 && t<=9000) {
-            w = 1.0;
-        } else if (t>9000 && t<=10000) {
-            w = 2.0;
-        } else if (t==10001) {
-            break;
+        if (i!=0) 
+        {
+            particle = particle_better;
+            mutation(particle);
+        }
+        if (_kbhit()) {
+            if (getch()=='x') break;
         }
         for (j=0;j<N_Particle;j++)
         {
             threads.emplace_back(
-                [j, w, &particle, &mom_t]{oper(&particle[j][0], particle[j][1], (int)9*Uniform(1), pow(10, w)*1.0e-2);
-                oper(&particle[j][1], particle[j][0], (int)9*Uniform(1), pow(10, w)*1.0e-2);
+                [j, &w, &particle, &mom_t]{oper(&particle[j][0], particle[j][1], (int)9*Uniform(1), w[(int)(8*Uniform(1))]);
+                oper(&particle[j][1], particle[j][0], (int)9*Uniform(1), w[(int)(8*Uniform(1))]);
                 func(particle[j], mom_t[j]);}
                 );
         }
@@ -189,7 +177,7 @@ int main(int argc, char const *argv[])
             if (i==0) particle = particle_init;
             else particle = particle_better;
         }
-    }while(i<gen);
+    }while(true);
     printf("\n*\n");
     printf("**********************************************************************************\n");
     printf("*    Final statistical information of particle after %d-st generation", i);
@@ -257,11 +245,11 @@ double mse(double *signal, double *simul)
 {
     int i;
     double res=0;
-    for (i = 0; i < 5; i++)
+    for (i = 0; i < 7; i++)
     {
         res += pow(signal[i] - simul[i], 2);
     }
-    res /= (double)5;
+    res /= (double)7;
     return res;
 }
 
@@ -293,7 +281,7 @@ double ep(double *signal, double *simul, double w)
 double lossfunction(double *signal, double *simul, double w)
 {
     printf("   mse=%1.5e   male=%1.5e",mse(signal, simul),msle(signal, simul));
-    return mse(signal, simul)+msle(signal, simul);//+ep(signal, simul, w));
+    return mse(signal, simul);//+msle(signal, simul);
 }
 
 void initPos(vector<vector<double>> &p, double mux, double muy)
@@ -303,8 +291,8 @@ void initPos(vector<vector<double>> &p, double mux, double muy)
     int i;
     for (i=0;i<N_Particle;i++)
     {
-        p[i][0] = rand_normal(mux, 10); // Position of X
-        p[i][1] = rand_normal(muy, 10); // Position of Y
+        p[i][0] = rand_normal(mux, 30); // Position of X
+        p[i][1] = rand_normal(muy, 30); // Position of Y
     }
     return;
 }
