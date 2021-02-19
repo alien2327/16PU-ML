@@ -99,18 +99,18 @@ MatrixXd monitor16pu::getVol(int addr, char fName[], double k, double x_1) {
         puts("*\tFile not opened");
     }
     fin.close();
-    double omega = 2 * M_PI * k / _Sampling, ans;
+    double omega = 2 * M_PI * k / 52;
+    double ans;
     MatrixXd _output = MatrixXd::Constant(_Channel, _Turn*_Bunch, 0);
-    double s[_Sampling];
     for (i = 0; i < _Channel; i++) {
+        double s[52];
         for (j = 0; j < _bufLen; j++) {
             if (j == 0) s[0] = rawData(i, j) + 2 * std::cos(omega) * x_1;
             else if (j == 1) s[1] = rawData(i, j) + 2 * std::cos(omega) * s[0] - x_1;
-            else s[j%_Sampling] = rawData(i, j) + 2 * std::cos(omega) * s[j%_Sampling-1] - s[j%_Sampling-2];
-            if (j%_Sampling == _Sampling-1) {
-                ans = std::sqrt(std::pow(s[_Sampling-1] - std::cos(omega) * s[_Sampling-2], 2) + std::pow(std::sin(omega) * s[_Sampling-2], 2))/(4*std::pow(_Sampling,2));
-                std::cout << ans << "\t";
-                _output(i, (j+1)/_Sampling - 1) = ans;
+            else s[j%52] = rawData(i, j) + 2 * std::cos(omega) * s[j%52-1] - s[j%52-2];
+            if (j%52 == 51) {
+                ans = std::sqrt(std::pow(s[52-1] - std::cos(omega) * s[52-2], 2) + std::pow(std::sin(omega) * s[52-2], 2))/(4*std::pow(52,2));
+                _output(i, (j+1)/52 - 1) = ans;
             }
         }
     }
@@ -120,26 +120,13 @@ MatrixXd monitor16pu::getVol(int addr, char fName[], double k, double x_1) {
 MatrixXd monitor16pu::getMoment(int addr, MatrixXd vol) {
     MatrixXd moment = MatrixXd::Constant(_Channel, _Turn*_Bunch, 0);
     int i, j;
-    double momentNorm;
     if (addr == 13) {
         std::cout << "*\tCalculating moment of #13" << std::endl;
         moment = matInvNorm13 * vol;
-        for (i = 0; i < _Turn*_Bunch; i++) {
-            moment(0, i) = momentNorm;
-            for (j = 0; j < _Channel; j++) {
-                moment(j, i) /= momentNorm;
-            }
-        }
         std::cout << "*\tNormalized complete" << std::endl;
     } else if (addr == 15) {
         std::cout << "*\tCalculating moment of #15" << std::endl;
         moment = matInvNorm15 * vol;
-        for (i = 0; i < _Turn*_Bunch; i++) {
-            moment(0, i) = momentNorm;
-            for (j = 0; j < _Channel; j++) {
-                moment(j, i) /= momentNorm;
-            }
-        }
         std::cout << "*\tNormalized complete" << std::endl;
     }
     return moment;
@@ -156,7 +143,6 @@ void monitor16pu::calEmit(MatrixXd mom13, MatrixXd mom15) {
         BeamSize(1, i) = mom15(3, i) - (pow(mom15(1, i), 2) - pow(mom15(2, i), 2));
     }
     BetaArr << beta13(0,0), beta13(1,0), beta15(0,0), beta15(1,0);
-    std::cout << BeamSize(0,0) << " " << BeamSize(1,0) << std::endl;
     Emittance = BetaArr.inverse() * BeamSize;
     for (i = 0; i < _Turn; i++) {
         std::cout << "*\t" << Emittance(0, i * 9) << " " << Emittance(1, i * 9) << std::endl;
