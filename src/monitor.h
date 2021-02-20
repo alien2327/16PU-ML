@@ -3,8 +3,8 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 #include <cmath>
-#include <vector>
 #include <Eigen/Dense>
 
 #define _Channel    16
@@ -32,7 +32,7 @@ class monitor16pu {
     monitor16pu();
 
     //DAQ
-    MatrixXd getVol(int, char *, double, double);
+    MatrixXd getVol(int, const char *, double, double);
 
     //Analysis
     MatrixXd getMoment(int, MatrixXd);

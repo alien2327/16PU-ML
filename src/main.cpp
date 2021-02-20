@@ -11,8 +11,19 @@ int main() {
 
     monitor16pu beamMonitor;
 
-    char waveData13[100] = "../16PU/data/beam/wave/wave_2019_12_20_11_00_45_address13.dat";
-    char waveData15[100] = "../16PU/data/beam/wave/wave_2019_12_20_11_00_45_address15.dat";
+    std::string ymd, hms;
+    std::string fName13, fName15;
+
+    std::cout << "*\tInput Year/Month/Day: ";
+    std::cin >> ymd;
+    std::cout << "*\tInput Hour/Minute/Second: ";
+    std::cin >> hms;
+
+    fName13 = "../16PU/data/beam/wave/wave_" + ymd.substr(0, 4) + "_" + ymd.substr(4, 2) + "_" + ymd.substr(6, 2) + "_" + hms.substr(0, 2) + "_" + hms.substr(2, 2) + "_" + hms.substr(4, 2) + "_address13.dat";
+    fName15 = "../16PU/data/beam/wave/wave_" + ymd.substr(0, 4) + "_" + ymd.substr(4, 2) + "_" + ymd.substr(6, 2) + "_" + hms.substr(0, 2) + "_" + hms.substr(2, 2) + "_" + hms.substr(4, 2) + "_address15.dat";
+
+    const char * waveData13 = fName13.c_str();
+    const char * waveData15 = fName15.c_str();
 
     MatrixXd mom13 = beamMonitor.getMoment(13, beamMonitor.getVol(13, waveData13, 2, 0));
     MatrixXd mom15 = beamMonitor.getMoment(15, beamMonitor.getVol(15, waveData15, 2, 0));

@@ -50,7 +50,7 @@ monitor16pu::monitor16pu() {
                         1.323100685038486250e+15,-1.360341993819534250e+15,1.376796562643399500e+15,-1.423658727584073000e+15,1.440792882199037250e+15,-1.428285215714143250e+15,1.423892139812061250e+15,-1.434509674775447500e+15,1.435978372553446750e+15,-1.436521328263131500e+15,1.443796679699884000e+15,-1.397169795814290500e+15,1.397732743069400000e+15,-1.367627397169950500e+15,1.367615245144060750e+15,-1.367057611243086750e+15;
 }
 
-MatrixXd monitor16pu::getVol(int addr, char fName[], double k, double x_1) {
+MatrixXd monitor16pu::getVol(int addr, const char * fName, double k, double x_1) {
     std::cout << "*\tRead out raw data from :" << std::endl;
     std::cout << "*\t" << fName << std::endl;
     int i, j, lag = 0, sum = 0, size = 468;
@@ -105,8 +105,8 @@ MatrixXd monitor16pu::getVol(int addr, char fName[], double k, double x_1) {
     for (i = 0; i < _Channel; i++) {
         double s[52];
         for (j = 0; j < _bufLen; j++) {
-            if (j == 0) s[0] = rawData(i, j) + 2 * std::cos(omega) * x_1;
-            else if (j == 1) s[1] = rawData(i, j) + 2 * std::cos(omega) * s[0] - x_1;
+            if (j%52 == 0) s[0] = rawData(i, j) + 2 * std::cos(omega) * x_1;
+            else if (j%52 == 1) s[1] = rawData(i, j) + 2 * std::cos(omega) * s[0] - x_1;
             else s[j%52] = rawData(i, j) + 2 * std::cos(omega) * s[j%52-1] - s[j%52-2];
             if (j%52 == 51) {
                 ans = std::sqrt(std::pow(s[52-1] - std::cos(omega) * s[52-2], 2) + std::pow(std::sin(omega) * s[52-2], 2))/(4*std::pow(52,2));
@@ -132,20 +132,56 @@ MatrixXd monitor16pu::getMoment(int addr, MatrixXd vol) {
     return moment;
 }
 
+void extractData(char _fName[], MatrixXd input) {
+    int i, j;
+    std::ofstream outfile;
+    outfile.open(_fName);
+    if (outfile.is_open()) {
+        for (i = 0; i < _Turn; i++) {
+            outfile << std::to_string(i) + " ";
+            for (j = 0; j < input.rows(); j++) {
+                outfile << std::to_string(input(j, i*9)) + " ";
+            }
+            outfile << "\n";
+        }
+    } else {
+        puts("*\tFile not opened");
+    }
+    outfile.close();
+}
+
 void monitor16pu::calEmit(MatrixXd mom13, MatrixXd mom15) {
     int i;
+    char fNameEmit[25] = "./result/emittance.dat";
+    char fNameBeam[25] = "./result/beamsize.dat";
     std::cout << "*\tCalculating Emittance" << std::endl;
     MatrixXd BetaArr = MatrixXd::Constant(2, 2, 0);
     MatrixXd Emittance = MatrixXd::Constant(2, _Turn*_Bunch, 0);
-    MatrixXd BeamSize = MatrixXd::Constant(2, _Turn*_Bunch, 0);
+    MatrixXd BeamSize = MatrixXd::Constant(4, _Turn*_Bunch, 0);
+    MatrixXd Twiss = MatrixXd::Constant(2, _Turn*_Bunch, 0);
     for (i = 0; i < _Turn*_Bunch; i++) {
-        BeamSize(0, i) = mom13(3, i) - (pow(mom13(1, i), 2) - pow(mom13(2, i), 2));
-        BeamSize(1, i) = mom15(3, i) - (pow(mom15(1, i), 2) - pow(mom15(2, i), 2));
+        Twiss(0, i) = mom13(3, i) - (pow(mom13(1, i), 2) - pow(mom13(2, i), 2));
+        Twiss(1, i) = mom15(3, i) - (pow(mom15(1, i), 2) - pow(mom15(2, i), 2));
     }
     BetaArr << beta13(0,0), beta13(1,0), beta15(0,0), beta15(1,0);
-    Emittance = BetaArr.inverse() * BeamSize;
-    for (i = 0; i < _Turn; i++) {
-        std::cout << "*\t" << Emittance(0, i * 9) << " " << Emittance(1, i * 9) << std::endl;
+    Emittance = BetaArr.inverse() * Twiss;
+    for (i = 0; i < _Turn*_Bunch; i++) {
+        BeamSize(0, i) = std::sqrt(beta13(0, 0) * Emittance(0, i));
+        BeamSize(1, i) = std::sqrt(-1 * beta13(1, 0) * Emittance(1, i));
+        BeamSize(2, i) = std::sqrt(beta15(0, 0) * Emittance(0, i));
+        BeamSize(3, i) = std::sqrt(-1 * beta15(1, 0) * Emittance(1, i));
     }
+    std::cout << "*\tPrint emittance" << std::endl;
+    std::cout << "*\tEmittance_x\tEmittance_y" << std::endl;
+    for (i = 0; i < _Turn; i++) {
+        std::cout << "*\t" << Emittance(0, i*9) << "\t\t" << Emittance(1, i*9) << std::endl;
+    }
+    std::cout << "*\tPrint beam size" << std::endl;
+    std::cout << "*\tSigma13_x\tSigma13_y\tSigma15_x\tSigma15_y" << std::endl;
+    for (i = 0; i < _Turn; i++) {
+        std::cout << "*\t" << BeamSize(0, i*9) << "\t\t" << BeamSize(1, i*9) << "\t\t" << BeamSize(2, i*9) << "\t\t" << BeamSize(3, i*9) << std::endl;
+    }
+    extractData(fNameEmit, Emittance);
+    extractData(fNameBeam, BeamSize);
     return;
 }
