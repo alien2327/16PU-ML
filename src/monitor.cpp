@@ -150,7 +150,7 @@ void extractData(char _fName[], MatrixXd input) {
     outfile.close();
 }
 
-void monitor16pu::calEmit(MatrixXd mom13, MatrixXd mom15) {
+MatrixXd monitor16pu::calEmit(MatrixXd mom13, MatrixXd mom15) {
     int i;
     char fNameEmit[25] = "./result/emittance.dat";
     char fNameBeam[25] = "./result/beamsize.dat";
@@ -160,8 +160,8 @@ void monitor16pu::calEmit(MatrixXd mom13, MatrixXd mom15) {
     MatrixXd BeamSize = MatrixXd::Constant(4, _Turn*_Bunch, 0);
     MatrixXd Twiss = MatrixXd::Constant(2, _Turn*_Bunch, 0);
     for (i = 0; i < _Turn*_Bunch; i++) {
-        Twiss(0, i) = mom13(3, i) - (pow(mom13(1, i), 2) - pow(mom13(2, i), 2));
-        Twiss(1, i) = mom15(3, i) - (pow(mom15(1, i), 2) - pow(mom15(2, i), 2));
+        Twiss(0, i) = mom13(3, i) - (std::pow(mom13(1, i), 2) - std::pow(mom13(2, i), 2));
+        Twiss(1, i) = mom15(3, i) - (std::pow(mom15(1, i), 2) - std::pow(mom15(2, i), 2));
     }
     BetaArr << beta13(0,0), beta13(1,0), beta15(0,0), beta15(1,0);
     Emittance = BetaArr.inverse() * Twiss;
@@ -171,17 +171,9 @@ void monitor16pu::calEmit(MatrixXd mom13, MatrixXd mom15) {
         BeamSize(2, i) = std::sqrt(beta15(0, 0) * Emittance(0, i));
         BeamSize(3, i) = std::sqrt(-1 * beta15(1, 0) * Emittance(1, i));
     }
-    std::cout << "*\tPrint emittance" << std::endl;
-    std::cout << "*\tEmittance_x\tEmittance_y" << std::endl;
-    for (i = 0; i < _Turn; i++) {
-        std::cout << "*\t" << Emittance(0, i*9) << "\t\t" << Emittance(1, i*9) << std::endl;
-    }
-    std::cout << "*\tPrint beam size" << std::endl;
-    std::cout << "*\tSigma13_x\tSigma13_y\tSigma15_x\tSigma15_y" << std::endl;
-    for (i = 0; i < _Turn; i++) {
-        std::cout << "*\t" << BeamSize(0, i*9) << "\t\t" << BeamSize(1, i*9) << "\t\t" << BeamSize(2, i*9) << "\t\t" << BeamSize(3, i*9) << std::endl;
-    }
+    std::cout << "*\tPrinting Emittance" << std::endl;
     extractData(fNameEmit, Emittance);
+    std::cout << "*\tPrinting Beam size" << std::endl;
     extractData(fNameBeam, BeamSize);
-    return;
+    return BeamSize;
 }

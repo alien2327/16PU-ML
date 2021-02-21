@@ -1,30 +1,41 @@
 #ifndef GENETIC
 #define GENETIC
 
-#include <cstdint>
-#include <fstream>
 #include <iostream>
-#include <vector>
+#include <Eigen/Dense>
 #include <thread>
-#include <ctime>
 #include <complex>
+#include <time.h>
 #include <cmath>
 
-#define N_Particle 200
+/* Period parameters */  
+#define MT_N 624
+#define MT_M 397
+#define MATRIX_A 0x9908b0dfUL   /* constant vector a */
+#define UPPER_MASK 0x80000000UL /* most significant w-r bits */
+#define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
-using namespace std;
-double mrate = 0.005;
+using namespace Eigen;
+typedef Matrix<double, 2, 100> Beam_t;
 
-double Uniform(int);
-void oper(double *, double, int);
-double rand_normal(double , double);
-void initPos(vector<vector<double>> &, double, double);
-void func(vector<double> &, double [16]);
-void mutation(vector<vector<double>> &);
+static unsigned long mt[MT_N]; /* the array for the state vector  */
+static int mti=MT_N+1; /* mti==MT_N+1 means mt[MT_N] is not initialized */
 
-// Evalution function
-double lossfunction(double *, double *);
-double mse(double *, double *);
-double ep(double *, double *);
+void oper(Beam_t &, double, int);
+void initPos(Beam_t &);
+void mutation();
+
+double lossfunction(MatrixXd, MatrixXd);
+double mse(MatrixXd, MatrixXd);
+double ep(MatrixXd, MatrixXd);
+
+void init_genrand(unsigned long s);
+void init_by_array(unsigned long init_key[], int key_length);
+unsigned long genrand_int32(void);
+long genrand_int31(void);
+double genrand_real1(void);
+double genrand_real2(void);
+double genrand_real3(void);
+double genrand_res53(void);
 
 #endif

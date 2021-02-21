@@ -36,7 +36,7 @@ class monitor16pu {
 
     //Analysis
     MatrixXd getMoment(int, MatrixXd);
-    void calEmit(MatrixXd, MatrixXd);
+    MatrixXd calEmit(MatrixXd, MatrixXd);
 };
 
 #endif
