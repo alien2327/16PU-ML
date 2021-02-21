@@ -3,11 +3,31 @@
 void initPos(Beam_t &part) {
     int i;
     double posMax = 82.5, posMin = -82.5;
-    init_genrand((unsigned)time(NULL));
     for (i = 0; i < part.cols(); i++) {
         part(0, i) = posMin + (posMax - posMin) * genrand_real1();
         part(1, i) = posMin + (posMax - posMin) * genrand_real1();
     }
+}
+
+double mean(MatrixXd _input, int xy) {
+    int i;
+    double res = 0.0;
+    for (i = 0; i < _input.cols(); i++) res += _input(xy, i);
+    return res;
+}
+
+double variance(MatrixXd _input, int xy) {
+    int i;
+    double res = 0.0, avg = mean(_input, xy);
+    for (i = 0; i < _input.cols(); i++) {
+        res += std::pow((_input(xy, i) + avg), 2);
+    }
+    return res;
+}
+
+double standard_deviation(MatrixXd _input, int xy) {
+    double res = std::sqrt(variance(_input, xy));
+    return res;
 }
 
 /*

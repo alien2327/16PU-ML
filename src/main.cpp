@@ -6,15 +6,65 @@
 //以前作った遺伝的アルゴリズムを改良し、作り直す。
 //サイズ情報と信号情報を組み合わせて、ビームのRMS分布を再構成する。
 
+//次回やること。
+//バンチを変える演算子の導入
+//従来の遺伝的アルゴリズムにするか、論文に従うか
+//評価関数・損失関数の導入
+//報告書・発表資料の作成
+
 void dataRead();
+void displayStat(Beam_t *);
 void doGenetic();
 
 int main() {
-    std::cout << "*******************************************************************************" << std::endl;
+    init_genrand((unsigned)time(NULL));
+    std::cout << "*****************************************************************************************" << std::endl;
+    std::cout << "*" << std::endl;
     doGenetic();
     std::cout << "*\tDone" << std::endl;
-    std::cout << "*******************************************************************************" << std::endl;
+    std::cout << "*" << std::endl;
+    std::cout << "*****************************************************************************************" << std::endl;
     return 0;
+}
+
+void displayStat(Beam_t *particle) {
+    int i, j;
+    double mx, my, sx, sy;
+    std::cout << "*\t" << std::endl;
+    for (i = 0; i < 5; i++) {
+        std::cout << "*\t";
+        for (j = 0; j < 4; j++) {
+            std::cout << 4*i+j << "-st bunch\t\t";
+        }
+        std::cout << std::endl;
+        std::cout << "*\t";
+        for (j = 0; j < 4; j++) {
+            mx = mean(particle[4*i+j], 0);
+            printf("mean x : %1.5e\t", mx);
+        }
+        std::cout << std::endl;
+        std::cout << "*\t";
+        for (j = 0; j < 4; j++) {
+            my = mean(particle[4*i+j], 1);
+            printf("mean y : %1.5e\t", my);
+        }
+        std::cout << std::endl;
+        std::cout << "*\t";
+        for (j = 0; j < 4; j++) {
+            sx = standard_deviation(particle[4*i+j], 0);
+            printf("sigma x: %1.5e\t", sx);
+        }
+        std::cout << std::endl;
+        std::cout << "*\t";
+        for (j = 0; j < 4; j++) {
+            sy = standard_deviation(particle[4*i+j], 1);
+            printf("sigma y: %1.5e\t", sy);
+        }
+        std::cout << std::endl;
+        std::cout << "*" << std::endl;
+    }
+
+    return;
 }
 
 void doGenetic() {
@@ -24,6 +74,7 @@ void doGenetic() {
     for (i = 0; i < 20; i++) {
         initPos(particle[i]);
     }
+    displayStat(particle);
     return;
 }
 

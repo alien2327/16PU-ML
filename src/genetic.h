@@ -29,6 +29,10 @@ double lossfunction(MatrixXd, MatrixXd);
 double mse(MatrixXd, MatrixXd);
 double ep(MatrixXd, MatrixXd);
 
+double mean(MatrixXd, int);
+double variance(MatrixXd, int);
+double standard_deviation(MatrixXd, int);
+
 void init_genrand(unsigned long s);
 void init_by_array(unsigned long init_key[], int key_length);
 unsigned long genrand_int32(void);
