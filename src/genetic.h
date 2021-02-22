@@ -17,15 +17,16 @@
 
 using namespace Eigen;
 typedef Matrix<double, 2, 100> Beam_t;
+typedef Matrix<double, 16, 1> Vol_t;
 
 static unsigned long mt[MT_N]; /* the array for the state vector  */
 static int mti=MT_N+1; /* mti==MT_N+1 means mt[MT_N] is not initialized */
 
-void oper(Beam_t &, double, int);
+void oper(double *, double, int, double);
 void initPos(Beam_t &);
 void mutation();
+MatrixXd func(MatrixXd, MatrixXd);
 
-double lossfunction(MatrixXd, MatrixXd);
 double mse(MatrixXd, MatrixXd);
 double ep(MatrixXd, MatrixXd);
 

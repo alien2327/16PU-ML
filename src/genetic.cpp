@@ -9,6 +9,19 @@ void initPos(Beam_t &part) {
     }
 }
 
+void oper(double *x, double y, int c, double d) {
+    int i, j;
+    if (c==1) *x = *x + d;
+    else if (c==2) *x = *x + (-1) * d;
+    else if (c==3) *x = *x * (1 + d);
+    else if (c==4) *x = *x * (1 + (-1) * d);
+    else if (c==5) *x = *x * (1 + y * d);
+    else if (c==6) *x = *x * (1 + y * (-1) * d);
+    else if (c==7) *x = *x * (1 + std::abs(y) * d);
+    else if (c==8) *x = *x * (1 + std::abs(y) * (-1) * d);
+    return;
+}
+
 double mean(MatrixXd _input, int xy) {
     int i;
     double res = 0.0;
@@ -30,36 +43,47 @@ double standard_deviation(MatrixXd _input, int xy) {
     return res;
 }
 
-/*
-double lossfunction(MatrixXd real, MatrixXd test) {
-    return mse(real, test) + ep(real, test);
+MatrixXd func(MatrixXd particle, MatrixXd monitor) {
+    int i, j, k;
+    double ans;
+    MatrixXd buf = MatrixXd::Constant(16, 1, 0);
+    MatrixXd vol = MatrixXd::Constant(16, 1, 0);
+    for (i = 0; i < particle.rows(); i++) {
+        std::complex<double> pos(particle(0, i), particle(1, i));
+        for (j = 0; j < 16; j++) {
+            if (j%2 == 0) {
+                buf(j, 0) += std::imag(pow(pos, (int)(j+1)/2));
+            } else {
+                buf(j, 0) += std::real(pow(pos, (int)(j+1)/2));
+            }
+        }
+    }
+    for (i = 0; i < 16; i++) buf(i, 0) /= particle.rows();
+    for (i = 0; i < 16; i++) {
+        for (j = 0; j < 16; j++) {
+            vol(i, 0) += monitor(i, j) * buf(j, 0);
+        }
+    }
+    return vol;
 }
-
 
 double mse(MatrixXd real, MatrixXd test) {
     int i;
-    double res=0;
-    for (i = 0; i < 16; i++)
-    {
-        res += std::pow((real[i] - test[i]), 2);
-    }
-    res /= (double)16;
+    double res = 0;
+    MatrixXd l = real + test;
+    MatrixXd lt = l.transpose();
+    MatrixXd resMat = l * lt;
+    res = resMat(0,0) / 16;
     return res;
 }
-
 
 double ep(MatrixXd real, MatrixXd test) {
-    int i=1, ii, iii;
-    double w=1.0e-3, res=0.0, norm, skew;
-    i=2;
-    ii = 2*i - 1;
-    iii = 2*i;
-    norm = exp(w*std::pow(test[ii] - real[ii],2));
-    skew = exp(w*std::pow(test[iii] - real[iii],2));
-    res += (norm+skew)-2;
+    double w=1.0e-8, res=0.0, norm, skew;
+    norm = exp(w*std::pow(test(0, 0) - real(0, 0),2));
+    skew = exp(w*std::pow(test(1, 0) - real(1, 0),2));
+    res += norm + skew;
     return res;
 }
-*/
 
 /* initializes mt[MT_N] with a seed */
 void init_genrand(unsigned long s) {

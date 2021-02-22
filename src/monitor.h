@@ -17,18 +17,19 @@
 using namespace Eigen;
 
 class monitor16pu {
-    private:
+    public:
     MatrixXd gain13 = MatrixXd::Constant(_Channel, 1, 0);
     MatrixXd align13 = MatrixXd::Constant(2, 1, 0);
     MatrixXd beta13 = MatrixXd::Constant(2, 1, 0);
+    MatrixXd mat13 = MatrixXd::Constant(_Channel, _Channel, 0);
     MatrixXd matInvNorm13 = MatrixXd::Constant(_Channel, _Channel, 0);
 
     MatrixXd gain15 = MatrixXd::Constant(_Channel, 1, 0);
     MatrixXd align15 = MatrixXd::Constant(2, 1, 0);
     MatrixXd beta15 = MatrixXd::Constant(2, 1, 0);
+    MatrixXd mat15 = MatrixXd::Constant(_Channel, _Channel, 0);
     MatrixXd matInvNorm15 = MatrixXd::Constant(_Channel, _Channel, 0);
 
-    public:
     monitor16pu();
 
     //DAQ
