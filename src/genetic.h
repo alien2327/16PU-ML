@@ -22,7 +22,7 @@ typedef Matrix<double, 16, 1> Vol_t;
 static unsigned long mt[MT_N]; /* the array for the state vector  */
 static int mti=MT_N+1; /* mti==MT_N+1 means mt[MT_N] is not initialized */
 
-void oper(double *, double, int, double);
+void oper(Beam_t &, int, double);
 void initPos(Beam_t &);
 void mutation();
 MatrixXd func(MatrixXd, MatrixXd);

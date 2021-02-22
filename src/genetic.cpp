@@ -9,16 +9,30 @@ void initPos(Beam_t &part) {
     }
 }
 
-void oper(double *x, double y, int c, double d) {
+void oper(Beam_t &_input, int c, double d) {
     int i, j;
-    if (c==1) *x = *x + d;
-    else if (c==2) *x = *x + (-1) * d;
-    else if (c==3) *x = *x * (1 + d);
-    else if (c==4) *x = *x * (1 + (-1) * d);
-    else if (c==5) *x = *x * (1 + y * d);
-    else if (c==6) *x = *x * (1 + y * (-1) * d);
-    else if (c==7) *x = *x * (1 + std::abs(y) * d);
-    else if (c==8) *x = *x * (1 + std::abs(y) * (-1) * d);
+    for (i = 0; i < _input.rows(); i++) {
+        double x = _input(0, i);
+        double y = _input(1, i);
+        if (c == 1) x = x + d;
+        else if (c == 2) x = x + (-1) * d;
+        else if (c == 3) x = x * (1 + d);
+        else if (c == 4) x = x * (1 + (-1) * d);
+        else if (c == 5) x = x * (1 + y * d);
+        else if (c == 6) x = x * (1 + y * (-1) * d);
+        else if (c == 7) x = x * (1 + std::abs(y) * d);
+        else if (c == 8) x = x * (1 + std::abs(y) * (-1) * d);
+        else if (c == 9) y = y + d;
+        else if (c == 10) y = y + (-1) * d;
+        else if (c == 11) y = y * (1 + d);
+        else if (c == 12) y = y * (1 + (-1) * d);
+        else if (c == 13) y = y * (1 + x * d);
+        else if (c == 14) y = y * (1 + x * (-1) * d);
+        else if (c == 15) y = y * (1 + std::abs(x) * d);
+        else if (c == 16) y = y * (1 + std::abs(x) * (-1) * d);
+        _input(0, i) = x;
+        _input(1, i) = y;
+    }
     return;
 }
 

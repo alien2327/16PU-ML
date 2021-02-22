@@ -7,9 +7,9 @@
 //サイズ情報と信号情報を組み合わせて、ビームのRMS分布を再構成する。
 
 //次回やること。
-//バンチを変える演算子の導入
+//バンチを変える演算子の導入 v
 //従来の遺伝的アルゴリズムにするか、論文に従うか
-//評価関数・損失関数の導入
+//評価関数・損失関数の導入 v
 //報告書・発表資料の作成
 
 void dataRead(MatrixXd &, MatrixXd &, MatrixXd &);
@@ -42,6 +42,14 @@ void doGenetic(MatrixXd v, MatrixXd bs) {
     std::cout << "*\tInitializing particle position" << std::endl;
     for (i = 0; i < 20; i++) {
         initPos(particle[i]);
+        vol[i] = func(particle[i], beamMonitor.mat13);
+        beamsize(0,0) = standard_deviation(particle[i], 0);
+        beamsize(1,0) = standard_deviation(particle[i], 1);
+        loss(i, 0) = mse(v.block(0,0,16,1), vol[i]) + ep(bs.block(0,0,3,1), beamsize);
+    }
+    displayStat(particle, loss);
+    for (i = 0; i < 20; i++) {
+        oper(particle[i], 3, 1);
         vol[i] = func(particle[i], beamMonitor.mat13);
         beamsize(0,0) = standard_deviation(particle[i], 0);
         beamsize(1,0) = standard_deviation(particle[i], 1);
