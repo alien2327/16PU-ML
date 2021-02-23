@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include <Eigen/Geometry>
 #include <thread>
+#include <vector>
 #include <complex>
 #include <time.h>
 #include <cmath>
@@ -16,23 +18,32 @@
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
 using namespace Eigen;
-typedef Matrix<double, 2, 100> Beam_t;
+typedef Matrix<double, 2, 1000> Beam_t;
+typedef Matrix<double, 2, 8> tBeam_t;
 typedef Matrix<double, 16, 1> Vol_t;
 
 static unsigned long mt[MT_N]; /* the array for the state vector  */
 static int mti=MT_N+1; /* mti==MT_N+1 means mt[MT_N] is not initialized */
 
-void oper(Beam_t &, int, double);
+void oper(Beam_t &, int, int, double);
+void applyOper(Beam_t &, int, double);
+void mutation(Beam_t &, int, double);
+void applyMut(Beam_t &, double);
 void initPos(Beam_t &);
-void mutation();
+void testPart(tBeam_t &);
 MatrixXd func(MatrixXd, MatrixXd);
 
 double mse(MatrixXd, MatrixXd);
 double ep(MatrixXd, MatrixXd);
+double lossmin(MatrixXd, MatrixXd::Index &, MatrixXd::Index &);
 
 double mean(MatrixXd, int);
+double meansqure(MatrixXd, int);
 double variance(MatrixXd, int);
 double standard_deviation(MatrixXd, int);
+
+double Uniform(int);
+double rand_normal(double, double);
 
 void init_genrand(unsigned long s);
 void init_by_array(unsigned long init_key[], int key_length);

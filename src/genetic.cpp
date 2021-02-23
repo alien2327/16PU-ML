@@ -2,36 +2,72 @@
 
 void initPos(Beam_t &part) {
     int i;
-    double posMax = 82.5, posMin = -82.5;
+    Uniform(100*genrand_real1());
+    double posMax = 10, posMin = -10;
+    double sigMax = 10, sigMin = 1;
     for (i = 0; i < part.cols(); i++) {
-        part(0, i) = posMin + (posMax - posMin) * genrand_real1();
-        part(1, i) = posMin + (posMax - posMin) * genrand_real1();
+        double mx = posMin + (posMax - posMin) * genrand_real1(), my = posMin + (posMax - posMin) * genrand_real1();
+        double sx = sigMin + (sigMax - sigMin) * genrand_real1(), sy = sigMin + (sigMax - sigMin) * genrand_real1();
+        part(0, i) = rand_normal(mx, sx);
+        part(1, i) = rand_normal(my, sy);
     }
 }
 
-void oper(Beam_t &_input, int c, double d) {
+void mutation(Beam_t &_input, int i, double mrate) {
+    double posMax = 10, posMin = -10;
+    if (mrate > genrand_real1()) _input(0, i) = posMin + (posMax - posMin) * genrand_real1();
+    if (mrate > genrand_real1()) _input(1, i) = posMin + (posMax - posMin) * genrand_real1();
+}
+
+void applyMut(Beam_t &_input, double mrate) {
     int i, j;
+    std::vector<std::thread> threads;
     for (i = 0; i < _input.rows(); i++) {
-        double x = _input(0, i);
-        double y = _input(1, i);
-        if (c == 1) x = x + d;
-        else if (c == 2) x = x + (-1) * d;
-        else if (c == 3) x = x * (1 + d);
-        else if (c == 4) x = x * (1 + (-1) * d);
-        else if (c == 5) x = x * (1 + y * d);
-        else if (c == 6) x = x * (1 + y * (-1) * d);
-        else if (c == 7) x = x * (1 + std::abs(y) * d);
-        else if (c == 8) x = x * (1 + std::abs(y) * (-1) * d);
-        else if (c == 9) y = y + d;
-        else if (c == 10) y = y + (-1) * d;
-        else if (c == 11) y = y * (1 + d);
-        else if (c == 12) y = y * (1 + (-1) * d);
-        else if (c == 13) y = y * (1 + x * d);
-        else if (c == 14) y = y * (1 + x * (-1) * d);
-        else if (c == 15) y = y * (1 + std::abs(x) * d);
-        else if (c == 16) y = y * (1 + std::abs(x) * (-1) * d);
-        _input(0, i) = x;
-        _input(1, i) = y;
+        threads.emplace_back(
+            [i, &_input, mrate]{mutation(_input, i, mrate);}
+        );
+    }
+    for(std::thread &th:threads) {
+            th.join();
+    }
+    return;
+}
+
+void oper(Beam_t &_input, int i, int c, double d) {
+    double x = _input(0, i);
+    double y = _input(1, i);
+    if (c == 0) x = x + d;
+    else if (c == 1) x = x + (-1) * d;
+    else if (c == 2) x = x * (1 + d);
+    else if (c == 3) x = x * (1 + (-1) * d);
+    else if (c == 4) x = x * (1 + y * d);
+    else if (c == 5) x = x * (1 + y * (-1) * d);
+    else if (c == 6) x = x * (1 + std::abs(y) * d);
+    else if (c == 7) x = x * (1 + std::abs(y) * (-1) * d);
+    else if (c == 8) y = y + d;
+    else if (c == 9) y = y + (-1) * d;
+    else if (c == 10) y = y * (1 + d);
+    else if (c == 11) y = y * (1 + (-1) * d);
+    else if (c == 12) y = y * (1 + x * d);
+    else if (c == 13) y = y * (1 + x * (-1) * d);
+    else if (c == 14) y = y * (1 + std::abs(x) * d);
+    else if (c == 15) y = y * (1 + std::abs(x) * (-1) * d);
+    _input(0, i) = x;
+    _input(1, i) = y;
+    return;
+}
+
+void applyOper(Beam_t &_input, int c, double d) {
+    int i, j;
+    std::vector<std::thread> threads;
+    for (i = 0; i < _input.rows(); i++) {
+        //c = 16 * genrand_real1();
+        threads.emplace_back(
+            [i, &_input, c, d]{oper(_input, i, c, d);}
+        );
+    }
+    for(std::thread &th:threads) {
+            th.join();
     }
     return;
 }
@@ -40,7 +76,14 @@ double mean(MatrixXd _input, int xy) {
     int i;
     double res = 0.0;
     for (i = 0; i < _input.cols(); i++) res += _input(xy, i);
-    return res;
+    return res/_input.cols();
+}
+
+double meansqure(MatrixXd _input, int xy) {
+    int i;
+    double res = 0.0;
+    for (i = 0; i < _input.cols(); i++) res += std::pow(_input(xy, i), 2);
+    return res/_input.cols();
 }
 
 double variance(MatrixXd _input, int xy) {
@@ -49,7 +92,7 @@ double variance(MatrixXd _input, int xy) {
     for (i = 0; i < _input.cols(); i++) {
         res += std::pow((_input(xy, i) + avg), 2);
     }
-    return res;
+    return res/_input.cols();
 }
 
 double standard_deviation(MatrixXd _input, int xy) {
@@ -81,22 +124,53 @@ MatrixXd func(MatrixXd particle, MatrixXd monitor) {
     return vol;
 }
 
+double lossmin(MatrixXd loss, MatrixXd::Index &row, MatrixXd::Index &col) {
+    return loss.minCoeff(&row, &col);
+}
+
 double mse(MatrixXd real, MatrixXd test) {
     int i;
     double res = 0;
-    MatrixXd l = real + test;
-    MatrixXd lt = l.transpose();
-    MatrixXd resMat = l * lt;
-    res = resMat(0,0) / 16;
+    real = real.normalized();
+    test = test.normalized();
+    //std::cout << "real " << real << std::endl;
+    //std::cout << "test " << test << std::endl;
+    for (i = 0; i < 16; i++) {
+        res += std::pow((real(i, 0) - test(i, 0)), 2);
+    }
+    res /= (double)16;
     return res;
 }
 
 double ep(MatrixXd real, MatrixXd test) {
-    double w=1.0e-8, res=0.0, norm, skew;
+    double w=1.0e-3, res=0.0, norm, skew;
     norm = exp(w*std::pow(test(0, 0) - real(0, 0),2));
     skew = exp(w*std::pow(test(1, 0) - real(1, 0),2));
     res += norm + skew;
     return res;
+}
+
+void testPart(tBeam_t &part) {
+    part(0,0) = 0.0; part(1,0) = 1.0;
+    part(0,1) = 1.0; part(1,1) = 3.0;
+    part(0,2) = 1.0; part(1,2) = -1.0;
+    part(0,3) = 2.0; part(1,3) = 1.0;
+    part(0,4) = 0.5; part(1,4) = -0.75;
+    part(0,5) = 0.5; part(1,5) = 2.75;
+    part(0,6) = 1.5; part(1,6) = 2.75;
+    part(0,7) = 1.5; part(1,7) = -0.75;
+}
+
+double Uniform(int x0) {
+	static int x=x0;
+	int a=1103515245,b=12345,c=2147483647;
+	x = (a*x + b)&c;
+	return ((double)x+1.0) / ((double)c+2.0);
+}
+
+double rand_normal(double mu, double sigma){
+	double z=sqrt( -2.0*log((double) Uniform(1)) ) * sin( 2.0*3.14159265358979323846*(double) Uniform(1) );
+	return mu + sigma*z;
 }
 
 /* initializes mt[MT_N] with a seed */
