@@ -3,7 +3,7 @@
 void initPos(Beam_t &part) {
     int i;
     Uniform(100*genrand_real1());
-    double posMax = 10, posMin = -10;
+    double posMax = 20, posMin = -20;
     double sigMax = 10, sigMin = 1;
     for (i = 0; i < part.cols(); i++) {
         double mx = posMin + (posMax - posMin) * genrand_real1(), my = posMin + (posMax - posMin) * genrand_real1();
@@ -151,14 +151,13 @@ double ep(MatrixXd real, MatrixXd test) {
 }
 
 void testPart(tBeam_t &part) {
-    part(0,0) = 0.0; part(1,0) = 1.0;
-    part(0,1) = 1.0; part(1,1) = 3.0;
-    part(0,2) = 1.0; part(1,2) = -1.0;
-    part(0,3) = 2.0; part(1,3) = 1.0;
-    part(0,4) = 0.5; part(1,4) = -0.75;
-    part(0,5) = 0.5; part(1,5) = 2.75;
-    part(0,6) = 1.5; part(1,6) = 2.75;
-    part(0,7) = 1.5; part(1,7) = -0.75;
+    int i;
+    for (i = 0; i < part.cols(); i++) {
+        double mx = 5, my = -2;
+        double sx = 5, sy = 8;
+        part(0, i) = rand_normal(mx, sx);
+        part(1, i) = rand_normal(my, sy);
+    }
 }
 
 double Uniform(int x0) {

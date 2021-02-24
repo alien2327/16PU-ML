@@ -19,7 +19,7 @@
 
 using namespace Eigen;
 typedef Matrix<double, 2, 1000> Beam_t;
-typedef Matrix<double, 2, 8> tBeam_t;
+typedef Matrix<double, 2, 1000> tBeam_t;
 typedef Matrix<double, 16, 1> Vol_t;
 
 static unsigned long mt[MT_N]; /* the array for the state vector  */

@@ -53,8 +53,8 @@ void testSet(MatrixXd &vol, MatrixXd &beamsize) {
     vol = func(testparticle, beamMonitor.mat13);
     beamsize(0,0) = meansqure(testparticle, 0);
     beamsize(1,0) = meansqure(testparticle, 1);
-    printf("*\n*\tTest Beam Position <x>: %1.5f\n", 1.0);
-    printf("*\tTest Beam Position <y>: %1.5f\n", 1.0);
+    printf("*\n*\tTest Beam Position <x>: %1.5f\n", mean(testparticle, 0));
+    printf("*\tTest Beam Position <y>: %1.5f\n", mean(testparticle, 1));
     printf("*\tTest Beam Size sigma_x: %1.5f\n", beamsize(0, 0));
     printf("*\tTest Beam Size sigma_y: %1.5f\n*\n", beamsize(1, 0));
 }
