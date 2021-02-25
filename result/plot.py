@@ -4,6 +4,67 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import matplotlib.cm as cm
 
+import cv2
+from skimage.metrics import structural_similarity
+from skimage.metrics import mean_squared_error
+
+fig = plt.figure(figsize=(6,6))
+
+data_set = np.loadtxt("true.dat", dtype="float", delimiter=",")
+
+x, y = [], []
+for data in data_set:
+    x.append(data[0])
+    y.append(data[1])
+
+ax1 = fig.add_subplot(1,1,1)
+ax1.hist2d(x, y, bins=100, cmap=cm.inferno)
+ax1.set_xlabel("x[mm]")
+ax1.set_ylabel("y[mm]")
+ax1.set_xlim([-82.5, 82.5])
+ax1.set_ylim([-82.5, 82.5])
+
+ax1.axis("off")
+
+plt.savefig("true.png", bbox_inches="tight", pad_inches=0.0)
+
+fig = plt.figure(figsize=(6,6))
+
+data_set = np.loadtxt("test.dat", dtype="float", delimiter=",")
+x, y = [], []
+for data in data_set:
+    x.append(data[0])
+    y.append(data[1])
+
+ax1 = fig.add_subplot(1,1,1)
+ax1.hist2d(x, y, bins=100, cmap=cm.inferno)
+ax1.set_xlabel("x[mm]")
+ax1.set_ylabel("y[mm]")
+ax1.set_xlim([-82.5, 82.5])
+ax1.set_ylim([-82.5, 82.5])
+
+ax1.axis("off")
+
+plt.savefig("test.png", bbox_inches="tight", pad_inches=0.0)
+
+# Read images from file.
+im1 = cv2.imread('./true.png')
+im2 = cv2.imread('./test.png')
+
+#tempDiff = cv2.subtract(im1, im2)
+
+gray1 = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
+gray2 = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
+
+mse = mean_squared_error(gray1, gray2)
+score = structural_similarity(gray1, gray2)
+
+print(f"MSE : {mse: .5f}")
+print(f"SSIM: {score: .5f}")
+
+
+
+"""
 fig = plt.figure(figsize=(12,6))
 
 data_set = np.loadtxt("true.dat", dtype="float", delimiter=",")
@@ -51,4 +112,4 @@ axHisty2.yaxis.set_tick_params(labelleft=False)
 axHistx2.hist(x, bins=100)
 axHisty2.hist(y, bins=100, orientation='horizontal')
 
-plt.show()
+"""
