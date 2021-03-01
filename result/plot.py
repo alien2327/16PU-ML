@@ -18,7 +18,7 @@ for data in data_set:
     y.append(data[1])
 
 ax1 = fig.add_subplot(1,1,1)
-ax1.hist2d(x, y, bins=100, cmap=cm.inferno)
+ax1.hist2d(x, y, bins=100, cmap=cm.Greys)
 ax1.set_xlabel("x[mm]")
 ax1.set_ylabel("y[mm]")
 ax1.set_xlim([-82.5, 82.5])
@@ -37,7 +37,7 @@ for data in data_set:
     y.append(data[1])
 
 ax1 = fig.add_subplot(1,1,1)
-ax1.hist2d(x, y, bins=100, cmap=cm.inferno)
+ax1.hist2d(x, y, bins=100, cmap=cm.Greys)
 ax1.set_xlabel("x[mm]")
 ax1.set_ylabel("y[mm]")
 ax1.set_xlim([-82.5, 82.5])
