@@ -187,6 +187,11 @@ void applyOper(Beam_t &_input, int c, double d) {
     return;
 }
 
+void applyOper(Beam_t &_input, double d) {
+
+    return;
+}
+
 double mean(MatrixXd _input, int xy) {
     int i;
     double res = 0.0;
