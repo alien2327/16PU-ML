@@ -18,3 +18,4 @@ for i in range(50):
     ax1.set_ylim([-82.5, 82.5])
     ax1.axis("off")
     plt.savefig(f"test_{i}.png", bbox_inches="tight", pad_inches=0.0)
+    plt.close()

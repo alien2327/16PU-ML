@@ -151,41 +151,40 @@ int main() {
         initBunch(try_bunch[i], 1);
     }
     array<pair<double, int>, 100> lossContainer;
-    array<array<array<double, 1000>, 2>, 5> bunchContainer;
+    array<array<array<double, 1000>, 2>, 10> bunchContainer;
     for (i = 0; i < 100; i++) {
         lossContainer[i] = make_pair(loss(reference_bunch, try_bunch[i]), i);
     }
-    /*
+    
     sort(lossContainer.begin(), lossContainer.end(), less<>());
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 10; i++) {
         cout << "  " << lossContainer[i].second << "-st bunch is selected!";
         cout << "\tLoss value: " << lossContainer[i].first << endl;
         bunchContainer[i] = try_bunch[lossContainer[i].second];
     }
     for (i = 0; i < 100; i++) {
-        try_bunch[i] = bunchContainer[(int)i/20];
+        try_bunch[i] = bunchContainer[(int)i/10];
     }
     bunchMutate(try_bunch);
     for (i = 0; i < 100; i++) {
         lossContainer[i] = make_pair(loss(reference_bunch, try_bunch[i]), i);
     }
-    */
+    
 
-    for (i = 0; i < 50; i++) {
+    for (i = 0; i < 20; i++) {
         string fName = "../result/procedure/test_"+to_string(i)+".dat";
         cout << "\n#" << i << " Geneneration changed" << endl;
         printOut(try_bunch[i], fName.c_str());
         bunchOperation(reference_bunch, try_bunch, lossContainer);
-
     }
 
     string testName = "../result/test.dat";
+    printOut(try_bunch[0], testName.c_str());
     
-    printOut(try_bunch[lossContainer[0].second], testName.c_str());
-    printf("\nMean X of ture bunch: %1.5e\n", mean(reference_bunch[0]));
-    printf("Mean Y of ture bunch: %1.5e\n", mean(reference_bunch[1]));
-    printf("Std X of ture bunch: %1.5e\n", standard_deviation(reference_bunch[0]));
-    printf("Std Y of ture bunch: %1.5e\n\n", standard_deviation(reference_bunch[1]));
+    printf("\nMean X of true bunch: %1.5e\n", mean(reference_bunch[0]));
+    printf("Mean Y of true bunch: %1.5e\n", mean(reference_bunch[1]));
+    printf("Std X of true bunch: %1.5e\n", standard_deviation(reference_bunch[0]));
+    printf("Std Y of true bunch: %1.5e\n\n", standard_deviation(reference_bunch[1]));
     printf("Mean X of test bunch: %1.5e\n", mean(try_bunch[lossContainer[0].second][0]));
     printf("Mean Y of test bunch: %1.5e\n", mean(try_bunch[lossContainer[0].second][1]));
     printf("Std X of test bunch: %1.5e\n", standard_deviation(try_bunch[lossContainer[0].second][0]));
@@ -197,88 +196,27 @@ int main() {
 
 void trans(array<array<double, 1000>, 2> &bunch, double gd, int mode) {
     int i;
-    uniform_real_distribution<> distX(-0.1, 0.1);
-    uniform_real_distribution<> distY(-0.1, 0.1);
+    uniform_real_distribution<> distX(-1, 1);
+    uniform_real_distribution<> distY(-1, 1);
     double dX = gd*distX(engine);
     double dY = gd*distY(engine);
     for (i = 0; i < 1000; i++) {
         double x = bunch[0][i];
         double y = bunch[1][i];
-        if (mode%4 == 0) {
+        if (mode%4 == 0 || mode%4 == 2) {
             bunch[0][i] = bunch[0][i] + dX;
             bunch[1][i] = bunch[1][i] + dY;
-        } else if (mode%4 == 1) {
+        } else if (mode%4 == 1 || mode%4 == 3) {
             bunch[0][i] = bunch[0][i] * (1 + dX);
             bunch[1][i] = bunch[1][i] * (1 + dY);
-        }  else if (mode%4 == 2) {
-            bunch[0][i] = bunch[0][i] * (1 + y * dX);
-            bunch[1][i] = bunch[1][i] * (1 + x * dY);
-        } else if (mode%4 == 3) {
-            bunch[0][i] = bunch[0][i] * (1 + abs(y) * dX);
-            bunch[1][i] = bunch[1][i] * (1 + abs(x) * dY);
         }
-    }
-    return;
-}
-
-void trans_0(array<array<double, 1000>, 2> &bunch, double gd, int mode) {
-    int i;
-    uniform_real_distribution<> distX(0.001, 0.1);
-    uniform_real_distribution<> distY(0.001, 0.1);
-    double dX = gd*distX(engine);
-    double dY = gd*distY(engine);
-    for (i = 0; i < 1000; i++) {
-        double x = bunch[0][i];
-        double y = bunch[1][i];
-        if (mode == 0) {
-            bunch[0][i] = bunch[0][i] + dX;
-            bunch[1][i] = bunch[1][i] + dY;
-        } else if (mode == 1) {
-            bunch[0][i] = bunch[0][i] - dX;
-            bunch[1][i] = bunch[1][i] + dY;
-        } else if (mode == 2) {
-            bunch[0][i] = bunch[0][i] + dX;
-            bunch[1][i] = bunch[1][i] - dY;
-        } else if (mode == 3) {
-            bunch[0][i] = bunch[0][i] - dX;
-            bunch[1][i] = bunch[1][i] - dY;
-        } else if (mode == 4) {
-            bunch[0][i] = bunch[0][i] * (1 + dX);
-            bunch[1][i] = bunch[1][i] * (1 + dY);
-        } else if (mode == 5) {
-            bunch[0][i] = bunch[0][i] * (1 - dX);
-            bunch[1][i] = bunch[1][i] * (1 + dY);
-        } else if (mode == 6) {
-            bunch[0][i] = bunch[0][i] * (1 + dX);
-            bunch[1][i] = bunch[1][i] * (1 - dY);
-        } else if (mode == 7) {
-            bunch[0][i] = bunch[0][i] * (1 - dX);
-            bunch[1][i] = bunch[1][i] * (1 - dY);
-        } else if (mode == 8) {
-            bunch[0][i] = bunch[0][i] * (1 + y * dX);
-            bunch[1][i] = bunch[1][i] * (1 + x * dY);
-        } else if (mode == 9) {
-            bunch[0][i] = bunch[0][i] * (1 - y * dX);
-            bunch[1][i] = bunch[1][i] * (1 + x * dY);
-        } else if (mode == 10) {
-            bunch[0][i] = bunch[0][i] * (1 + y * dX);
-            bunch[1][i] = bunch[1][i] * (1 - x * dY);
-        } else if (mode == 11) {
-            bunch[0][i] = bunch[0][i] * (1 - y * dX);
-            bunch[1][i] = bunch[1][i] * (1 - x * dY);
-        } else if (mode == 12) {
-            bunch[0][i] = bunch[0][i] * (1 + abs(y) * dX);
-            bunch[1][i] = bunch[1][i] * (1 + abs(x) * dY);
-        } else if (mode == 13) {
-            bunch[0][i] = bunch[0][i] * (1 - abs(y) * dX);
-            bunch[1][i] = bunch[1][i] * (1 + abs(x) * dY);
-        } else if (mode == 14) {
-            bunch[0][i] = bunch[0][i] * (1 + abs(y) * dX);
-            bunch[1][i] = bunch[1][i] * (1 - abs(x) * dY);
-        } else if (mode == 15) {
-            bunch[0][i] = bunch[0][i] * (1 - abs(y) * dX);
-            bunch[1][i] = bunch[1][i] * (1 - abs(x) * dY);
-        }
+        //  else if (mode%4 == 2) {
+        //    bunch[0][i] = bunch[0][i] * (1 + y * dX);
+        //    bunch[1][i] = bunch[1][i] * (1 + x * dY);
+        //} else if (mode%4 == 3) {
+        //   bunch[0][i] = bunch[0][i] * (1 + abs(y) * dX);
+        //    bunch[1][i] = bunch[1][i] * (1 + abs(x) * dY);
+        //}
     }
     return;
 }
@@ -289,7 +227,7 @@ void bunchMutate(array<array<array<double, 1000>, 2>, 100> &bunch) {
     for (i = 0; i < 100; i++) {
         uniform_real_distribution<> distMode(0, 17);
         if (_MRATE > distMutate(engine)) {
-            trans(bunch[i], 1, distMode(engine));
+            initBunch(bunch[i], 1);
             cout << "  " << i << "-st bunch is Mutated!" << endl;
         }
     }
@@ -373,12 +311,12 @@ double MSE(array<double, 16> reference, array<double, 16> test) {
 
 double EP(array<array<double, 1000>, 2> reference, array<array<double, 1000>, 2> test) {
     double ms_x_ref, ms_y_ref, ms_x_try, ms_y_try;
-    ms_x_ref = mean_squre(reference[0]);
-    ms_y_ref = mean_squre(reference[1]);
-    ms_x_try = mean_squre(test[0]);
-    ms_y_try = mean_squre(test[1]);
+    ms_x_ref = standard_deviation(reference[0]);
+    ms_y_ref = standard_deviation(reference[1]);
+    ms_x_try = standard_deviation(test[0]);
+    ms_y_try = standard_deviation(test[1]);
     double res = 0;
-    double w = 0.0001;
+    double w = 1000;
     res = exp(w*pow(sqrt(ms_x_ref) - sqrt(ms_x_try), 2)) + exp(w*pow(sqrt(ms_y_ref) - sqrt(ms_y_try), 2));
     return res-2;
 }
@@ -409,7 +347,7 @@ void J_image(array<array<double, 1000>, 2> &bunch, array<double, 16> &output) {
 
 void initBunch(array<array<double, 1000>, 2> &bunch, int mode) {
     if (mode == 0) {
-        uniform_real_distribution<> distMean(-20, 20);
+        uniform_real_distribution<> distMean(-25, 25);
         uniform_real_distribution<> distStd(4, 12);
         uniform_real_distribution<> distMode(0, 17);
         int i, j;
@@ -419,10 +357,10 @@ void initBunch(array<array<double, 1000>, 2> &bunch, int mode) {
                 bunch[i][j] = distCord(engine);
             }
         }
-        trans(bunch, 0.01, (int)distMode(engine));
+        //trans(bunch, 0.01, (int)distMode(engine));
     } else if (mode == 1) {
-        uniform_real_distribution<> distMean(-45, 45);
-        uniform_real_distribution<> distStd(5, 15);
+        uniform_real_distribution<> distMean(-50, 50);
+        uniform_real_distribution<> distStd(5, 20);
         int i, j;
         for (i = 0; i < bunch.size(); i++) {
             normal_distribution<> distCord(distMean(engine), distStd(engine));

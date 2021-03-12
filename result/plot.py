@@ -28,8 +28,6 @@ ax1.axis("off")
 
 plt.savefig("true.png", bbox_inches="tight", pad_inches=0.0)
 
-#for i in range(100):
-
 fig = plt.figure(figsize=(6,6))
 data_set = np.loadtxt(f"test.dat", dtype="float", delimiter=",")
 x, y = [], []
@@ -54,6 +52,7 @@ gray1 = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
 gray2 = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
 mse = mean_squared_error(im1, im2)
 print(f"MSE : {mse: .5f}")
+plt.close()
 
 
 
