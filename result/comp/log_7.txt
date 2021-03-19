@@ -1,0 +1,16 @@
+    true_bunch = gen_bunch(0, 4, 0, 10)
+    trans_method(true_bunch, 4, 1, -1)
+    try_bunch = gen_bunch(0, 1, 0, 10)
+    trans_method(try_bunch, 4, 1, -1)
+
+:: MSE:  0.00211158     EP-2:  0.00569646       RES:  0.00780804
+::
+:: Position X:  -0.0011777737282400835 [mm]
+:: Position Y:  0.17125190669117757 [mm]
+:: Size X:  7.513674065553627 [mm^2]
+:: Size Y:  7.702714362769256 [mm^2]
+::
+:: Position X:  0.05359305489911315 [mm]
+:: Position Y:  0.09622891613876221 [mm]
+:: Size X:  7.060792639096997 [mm^2]
+:: Size Y:  7.099662254149334 [mm^2]
